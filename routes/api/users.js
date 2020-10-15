@@ -1,16 +1,23 @@
-const route = require("express").Router();
-const User = require("../../model/user"); // .-current folder  ../ out from current folder   ../../ out from next current folder
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const gravatar = require("gravatar");
-const { secretKey } = require("../../config/keys");
+const express = require('express');
+const route = express.Router();
+const gravatar = require('gravatar');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const keys = require('../../config/keys');
+// const { secretOrKey } = require("../../config/keys");  // can use destructuring ot get secret kkey directly
 
-///// test the  app/////
+const passport = require('passport');
+
+// Load Input Validation
+// const validateRegisterInput = require('../../validation/register');
+// const validateLoginInput = require('../../validation/login');
+
+
+const User = require("../../models/User"); // .-current folder  ../ out from current folder   ../../ out from next current folder
+
 route.get("/test", (req, res) => {
   res.json({ msg: "Users works!" });
 });
-
-////////register the user/////////////
 
 route.post("/register", async (req, res) => {
   const emailExist = await User.findOne({ email: req.body.email });
@@ -53,17 +60,28 @@ route.post("/login", async (req, res) => {
   const payload = { id: user.id, name: user.name, avatar: user.avatar };
   const token = jwt.sign(
     payload,
-    secretKey,
-    { expiresIn: 3600 },
+    keys.secretOrKey,
+    { expiresIn: 604800 },
     (err, token) => {
-      res.json({ success: true, token: "Bearer" + token });
+
+      console.log(`this is token that goes to client : ${token}`);
+
+      res.json({ success: true, token: "Bearer " + token });
     }
   );
 });
 
-module.exports = route;
 
-// var ex={};
-// var x="abc"
-// ex={x};
-// console.log(ex);
+route.get(
+  '/current',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    res.json({
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email
+    });
+  }
+);
+
+module.exports = route;
