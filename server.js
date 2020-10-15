@@ -10,10 +10,11 @@ const posts = require('./routes/api/posts');
 const app = express();
 // const session=require("express-session");
 // const MongoStore = require('connect-mongo')(session);
+app.use(express.json());
 
 // Body parser middleware
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(bodyParser.json());
 
 // DB Config
 const db = require('./config/keys').mongoURI;
