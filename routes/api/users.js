@@ -1,17 +1,22 @@
-const express = require('express');
+const express = require("express");
 const route = express.Router();
-const gravatar = require('gravatar');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const keys = require('../../config/keys');
+const gravatar = require("gravatar");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const keys = require("../../config/keys");
 // const { secretOrKey } = require("../../config/keys");  // can use destructuring ot get secret kkey directly
 
-const passport = require('passport');
+
+
+const passport = require("passport");
+
+const registervalidation = require("../../validations/register_vali");
+const loginvalidation = require("../../validations/login_val");
+
 
 // Load Input Validation
 // const validateRegisterInput = require('../../validation/register');
 // const validateLoginInput = require('../../validation/login');
-
 
 const User = require("../../models/User"); // .-current folder  ../ out from current folder   ../../ out from next current folder
 
@@ -20,6 +25,10 @@ route.get("/test", (req, res) => {
 });
 
 route.post("/register", async (req, res) => {
+  const { error } = registervalidation(req.body);
+  if (error) {
+    res.send(error.details[0].message);
+  }
   const emailExist = await User.findOne({ email: req.body.email });
   if (emailExist) {
     return res.status(400).send("Email already exists");
@@ -37,6 +46,7 @@ route.post("/register", async (req, res) => {
     email: req.body.email,
     password: hashpassword,
     avatar: avatar,
+    // anything:"mongo_let_me_do_anything"
   });
 
   try {
@@ -49,6 +59,13 @@ route.post("/register", async (req, res) => {
 ////////////////login the user///////////////////////////////////
 
 route.post("/login", async (req, res) => {
+
+  const {error}=loginvalidation(req.body);
+  if(error)
+  {
+    res.status(400).send(error.details[0].message);
+
+  }
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
     res.send("Email not found.");
@@ -63,7 +80,6 @@ route.post("/login", async (req, res) => {
     keys.secretOrKey,
     { expiresIn: 604800 },
     (err, token) => {
-
       console.log(`this is token that goes to client : ${token}`);
 
       res.json({ success: true, token: "Bearer " + token });
@@ -71,15 +87,14 @@ route.post("/login", async (req, res) => {
   );
 });
 
-
 route.get(
-  '/current',
-  passport.authenticate('jwt', { session: false }),
+  "/current",
+  passport.authenticate("jwt", { session: false }),
   (req, res) => {
     res.json({
       id: req.user.id,
       name: req.user.name,
-      email: req.user.email
+      email: req.user.email,
     });
   }
 );

@@ -2,14 +2,15 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const passport = require('passport');
-
+const {secretOrKey}=require("./config/keys");
+console.log(secretOrKey);
 const users = require('./routes/api/users');
 const profile = require('./routes/api/profile');
 const posts = require('./routes/api/posts');
 
 const app = express();
-// const session=require("express-session");
-// const MongoStore = require('connect-mongo')(session);
+const session=require("express-session");
+const MongoStore = require('connect-mongo')(session);
 app.use(express.json());
 
 // Body parser middleware
@@ -36,18 +37,18 @@ app.use(passport.initialize());
 // Passport Config
 require('./config/passport')(passport);
 /////////////////////////////maintain session using cookies////////////////
-// const sessionstore=new MongoStore({
-//   mongooseConnection:connection,
-//   collection:'grootedb'
-// })
+const sessionstore=new MongoStore({
+  mongooseConnection:connection,
+  collection:'grootedb'
+})
 
-// app.use(session({
-// secret:uri,
-// resave:false,
-// cookie:{maxAge:1000*60*60*24},
-// store:sessionstore
+app.use(session({
+secret:secretOrKey,
+resave:false,
+cookie:{maxAge:1000*60*60*24},
+store:sessionstore
 
-// }))
+}))
 //////////////////////////////end//////////////////////////////////////////
 
 
