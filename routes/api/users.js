@@ -6,13 +6,10 @@ const jwt = require("jsonwebtoken");
 const keys = require("../../config/keys");
 // const { secretOrKey } = require("../../config/keys");  // can use destructuring ot get secret kkey directly
 
-
-
 const passport = require("passport");
 
 const registervalidation = require("../../validations/register_vali");
 const loginvalidation = require("../../validations/login_val");
-
 
 // Load Input Validation
 // const validateRegisterInput = require('../../validation/register');
@@ -25,15 +22,28 @@ route.get("/test", (req, res) => {
 });
 
 route.post("/register", async (req, res) => {
-  const { error } = registervalidation(req.body);
+
+
+// res.json("my data is here");
+
+  const ress = registervalidation(req.body);
+
+
+  console.log(ress); 
+
+  // const runthis=error.details
+
   if (error) {
-    res.send(error.details[0].message);
+
+    error.details[0].x=error.details[0].context.key;
+    res.status(400).json(error.details[0]);
   }
   const emailExist = await User.findOne({ email: req.body.email });
   if (emailExist) {
-    return res.status(400).send("Email already exists");
+
+    return res.status(400).json("Email already exist");
   }
-  //// now hash the password//////////////////
+  //// now hash the password////////////////// 
   const salt = await bcrypt.genSalt();
   const hashpassword = await bcrypt.hash(req.body.password, salt);
   const avatar = gravatar.url(req.body.email, {
@@ -46,25 +56,20 @@ route.post("/register", async (req, res) => {
     email: req.body.email,
     password: hashpassword,
     avatar: avatar,
-    // anything:"mongo_let_me_do_anything"
   });
-
   try {
     const savedUser = await user.save();
-    res.send(savedUser);
+    console.log("abcdeefgh");
   } catch (err) {
-    res.send("Got err" + err);
+    res.send(err);
   }
 });
 ////////////////login the user///////////////////////////////////
 
 route.post("/login", async (req, res) => {
-
-  const {error}=loginvalidation(req.body);
-  if(error)
-  {
+  const { error } = loginvalidation(req.body);
+  if (error) {
     res.status(400).send(error.details[0].message);
-
   }
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
