@@ -20,28 +20,21 @@ const User = require("../../models/User"); // .-current folder  ../ out from cur
 route.get("/test", (req, res) => {
   res.json({ msg: "Users works!" });
 });
-
+////////////////////register/////////////////////////
 route.post("/register", async (req, res) => {
 
+  const {errors,isValid} = registervalidation(req.body);
 
-// res.json("my data is here");
-
-  const ress = registervalidation(req.body);
-
-
-  console.log(ress); 
-
-  // const runthis=error.details
-
-  if (error) {
-
-    error.details[0].x=error.details[0].context.key;
-    res.status(400).json(error.details[0]);
+  if (!isValid) {
+    // errors.error.details[0].x=errors.error.details[0].context.key;
+    // res.status(400).json(errors.error.details[0]);
+    res.status(400).json(errors)
   }
   const emailExist = await User.findOne({ email: req.body.email });
   if (emailExist) {
+    errors.email="email already exists"
 
-    return res.status(400).json("Email already exist");
+    return res.status(400).json(errors);
   }
   //// now hash the password////////////////// 
   const salt = await bcrypt.genSalt();
@@ -50,7 +43,7 @@ route.post("/register", async (req, res) => {
     s: "200",
     r: "pg",
     d: "mm",
-  });
+  }); 
   const user = new User({
     name: req.body.name,
     email: req.body.email,
@@ -59,25 +52,30 @@ route.post("/register", async (req, res) => {
   });
   try {
     const savedUser = await user.save();
-    console.log("abcdeefgh");
   } catch (err) {
-    res.send(err);
+    res.status(400).json(err);
   }
 });
 ////////////////login the user///////////////////////////////////
 
 route.post("/login", async (req, res) => {
-  const { error } = loginvalidation(req.body);
-  if (error) {
-    res.status(400).send(error.details[0].message);
+  const { isValid, errors } = loginvalidation(req.body);
+
+  console.log("aa...........................");
+  if (!isValid) {
+   
+    res.status(400).json(errors)
   }
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
-    res.send("Email not found.");
+
+    errors.email="Email not found!!";
+    res.status(400).json(errors);
   }
   const validpass = await bcrypt.compare(req.body.password, user.password);
   if (!validpass) {
-    res.send("Password doesn't match");
+    errors.password="password doesn't match!!"
+    res.status(400).json(errors);
   }
   const payload = { id: user.id, name: user.name, avatar: user.avatar };
   const token = jwt.sign(
