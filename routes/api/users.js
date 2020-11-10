@@ -22,28 +22,27 @@ route.get("/test", (req, res) => {
 });
 ////////////////////register/////////////////////////
 route.post("/register", async (req, res) => {
-
-  const {errors,isValid} = registervalidation(req.body);
+  const { errors, isValid } = registervalidation(req.body);
 
   if (!isValid) {
     // errors.error.details[0].x=errors.error.details[0].context.key;
     // res.status(400).json(errors.error.details[0]);
-    res.status(400).json(errors)
+    res.status(400).json(errors);
   }
   const emailExist = await User.findOne({ email: req.body.email });
   if (emailExist) {
-    errors.email="email already exists"
+    errors.email = "email already exists";
 
     return res.status(400).json(errors);
   }
-  //// now hash the password////////////////// 
+  //// now hash the password//////////////////
   const salt = await bcrypt.genSalt();
   const hashpassword = await bcrypt.hash(req.body.password, salt);
   const avatar = gravatar.url(req.body.email, {
     s: "200",
     r: "pg",
     d: "mm",
-  }); 
+  });
   const user = new User({
     name: req.body.name,
     email: req.body.email,
@@ -52,6 +51,8 @@ route.post("/register", async (req, res) => {
   });
   try {
     const savedUser = await user.save();
+
+    res.json(savedUser);
   } catch (err) {
     res.status(400).json(err);
   }
@@ -63,18 +64,16 @@ route.post("/login", async (req, res) => {
 
   console.log("aa...........................");
   if (!isValid) {
-   
-    res.status(400).json(errors)
+    res.status(400).json(errors);
   }
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
-
-    errors.email="Email not found!!";
+    errors.email = "Email not found!!";
     res.status(400).json(errors);
   }
   const validpass = await bcrypt.compare(req.body.password, user.password);
   if (!validpass) {
-    errors.password="password doesn't match!!"
+    errors.password = "password doesn't match!!";
     res.status(400).json(errors);
   }
   const payload = { id: user.id, name: user.name, avatar: user.avatar };

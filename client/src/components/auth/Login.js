@@ -1,6 +1,8 @@
-import axios from "axios";
-import classnames from "classnames";
 import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { loginUser } from "../../actions/authActions";
+import TextFieldGroup from "../common/TextFieldGroup";
 class Login extends Component {
   constructor() {
     super();
@@ -13,12 +15,25 @@ class Login extends Component {
     this.onChange = this.onChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
   }
-
-  onChange(e) {
-    this.setState({
-      [e.target.name]: e.target.value,
-    });
+componentDidMount()
+{
+  if(this.props.auth.isAuthenticated)
+  {
+    this.props.history.push('/dashboard');
   }
+}
+  componentWillReceiveProps(nextprops)
+  {
+    if(nextprops.auth.isAuthenticated)
+    {
+      this.props.history.push("/dashboard");
+    }
+    if(nextprops.errors)
+    {
+      this.setState({errors:nextprops.errors})
+    }
+  }
+
   onSubmit(e) {
     e.preventDefault();
 
@@ -27,61 +42,50 @@ class Login extends Component {
       password: this.state.password,
     };
 
-    axios
-      .post("/api/users/login", newUser)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        this.setState({
-          errors: err.response.data,
-        });
-
-        console.log(err.response.data);
-      });
-    // console.log(newUser);
+    this.props.loginUser(newUser);
+    console.log(newUser);
   }
+
+  onChange(e) {
+    this.setState({ [e.target.name]: e.target.value });
+  }
+
   render() {
-    const { errors } = this.state.errors;
+    const { errors } = this.state;
+
     return (
-      <div class="login">
-        <div class="container">
-          <div class="row">
-            <div class="col-md-8 m-auto">
-              <h1 class="display-4 text-center">Log In</h1>
-              <p class="lead text-center">
+      <div className="login">
+        <div className="container">
+          <div className="row">
+            <div className="col-md-8 m-auto">
+              <h1 className="display-4 text-center">Log In</h1>
+              <p className="lead text-center">
                 Sign in to your DevConnector account
               </p>
               <form onSubmit={this.onSubmit}>
-                <div class="form-group">
-                  <input
-                    type="email"
-                    className={classnames("form-control form-control-lg", {
-                      "is-invalid": errors.email,
-                    })}
-                    placeholder="Email Address"
-                    name="email"
-                    value={this.state.email}
-                    onChange={this.onChange}
-                  />
+               <TextFieldGroup
 
-                  {errors.name && (
-                    <div className="invalid-feedback">{errors.name}</div>
-                  )}
-                </div>
-                <div class="form-group">
-                  <input
-                    type="password"
-                    className={classnames("form-control form-control-lg", {
-                      "is-invalid": errors.password,
-                    })}
-                    placeholder="Password"
-                    name="password"
-                    value={this.state.password}
-                    onChange={this.onChange}
-                  />
-                </div>
-                <input type="submit" class="btn btn-info btn-block mt-4" />
+               placeholder="Email Address"
+               name="email"
+               type="email"
+               value={this.state.email}
+               onChange={this.onChange}
+               error={errors.email}
+               />
+              
+
+               <TextFieldGroup
+
+               placeholder="password"
+               name="password"
+               type="password"
+               value={this.state.password}
+               onChange={this.onChange}
+               error={errors.password}
+               />
+
+               <input type="submit" className="btn btn-info btn-block mt-4"/>
+        
               </form>
             </div>
           </div>
@@ -91,4 +95,16 @@ class Login extends Component {
   }
 }
 
-export default Login;
+Login.propTypes = {
+  loginUser: PropTypes.func.isRequired,
+  auth: PropTypes.object.isRequired,
+  errors: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  auth: state.auth,
+  errors: state.errors,
+});
+
+export default connect(mapStateToProps, { loginUser })(Login);
+

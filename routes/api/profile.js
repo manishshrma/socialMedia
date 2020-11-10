@@ -21,7 +21,7 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     console.log(req.user);
-    const { error } = profilevalidation(req);
+    const { isValid, errors } = profilevalidation(req);
     const profileFields = {};
 
     profileFields.user = req.user.id; // note this user is attached to req , u know it is insdie of jwt token
@@ -74,8 +74,8 @@ router.post(
       try {
         const savedProfile = await profile_obj.save();
         res.send(savedProfile);
-      } catch (err) {
-        res.send("got err" + err);
+      } catch (errors) {
+        res.send("got err" + errors);
       }
     }
   }
@@ -100,12 +100,13 @@ router.get(
   "/",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    const errors={};
     Profile.findOne({ user: req.user.id })
       .populate("user", ["name", "avatar"])
       .then((profile) => {
         if (!profile) {
-          res.send("no such profile");
-        }
+          errors.noprofile = 'There is no profile for this user';
+          return res.status(404).json(errors);        }
         res.send(profile);
       });
   }
@@ -113,14 +114,18 @@ router.get(
 
 //////////get profile through handle(it is public )//////////////
 router.get("/handle/:handle", (req, res) => {
+  const errors={};
   Profile.findOne({
     handle: req.params.handle,
   })
     .populate("user", ["name", "avatar"])
     .then((profile) => {
       if (!profile) {
-        res.send("no profile for this handle");
-      } else {
+        errors.noprofile = 'There is no profile for this user';
+        res.status(404).json(errors);
+      }   
+      
+      else {
         res.status(200).json(profile);
       }
     })

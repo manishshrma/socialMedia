@@ -1,15 +1,22 @@
-// import allReducers from "../../../../Redux/learn_redux/src/reducers";
-import {TEST_DISPATCH} from "../actions/types";
+import { SET_CURRENT_USER } from "../actions/types";
+import isEmpty from "../validations/is-empty";
 const initialState = {
-  isAuthenticated: false, 
+  isAuthenticated: false,
   user: {},
 };
 
-
-const authReducer = (state = initialState, action) => {  // there it is(state)
+const authReducer = (state = initialState, action) => {
+  // there it is(state)
   switch (action.type) {
-   default:
-    return state;
+    case SET_CURRENT_USER:
+      return {
+        ...state,
+        isAuthenticated: !isEmpty(action.payload),
+        user:action.payload
+      };
+
+    default:
+      return state;
   }
 };
 export default authReducer;
