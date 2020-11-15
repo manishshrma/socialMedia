@@ -10,6 +10,10 @@ const User = require("../../models/User");
 const Profile = require("../../models/Profile");
 
 const profilevalidation = require("../../validations/profile_val");
+const experiencevalidation = require("../../validations/experience_val");
+const educationvalidatiom = require("../../validations/education_val");
+
+
 const { session } = require("passport");
 /////////////testing routes///////////////////////
 router.get("/test", (req, res) => res.json({ msg: "Profile Works" }));
@@ -20,11 +24,20 @@ router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
+    console.log("printing 1: user data"); // testing purpose
     console.log(req.user);
-    const { isValid, errors } = profilevalidation(req);
+    const { errors, isValid } = profilevalidation(req.body);
+
+    if (!isValid) {
+      return res.status(400).json(errors);
+    }
     const profileFields = {};
 
     profileFields.user = req.user.id; // note this user is attached to req , u know it is insdie of jwt token
+
+    if (req.body.company) {
+      console.log(req.body.company);
+    }
 
     if (req.body.handle) profileFields.handle = req.body.handle;
     if (req.body.company) profileFields.company = req.body.company;
@@ -66,16 +79,21 @@ router.post(
 
       const profile = await Profile.findOne({ handle: profileFields.handle });
       if (profile) {
-        res.status(400).send("Handle already exists");
+        errors.handle = "Handle already exist";
+        res.status(400).send(errors);
       }
 
       const profile_obj = new Profile(profileFields);
+      console.log("printing 2: save profile"); // testing purpose
+      // console.log("//////////////////////////////////aaaaa///////////////");
 
       try {
         const savedProfile = await profile_obj.save();
+// console.log("/////////////////////////////////////////////////");
+        console.log(savedProfile);
         res.send(savedProfile);
       } catch (errors) {
-        res.send("got err" + errors);
+        res.status(400).send("got err" + errors);
       }
     }
   }
@@ -100,13 +118,14 @@ router.get(
   "/",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    const errors={};
+    const errors = {};
     Profile.findOne({ user: req.user.id })
       .populate("user", ["name", "avatar"])
       .then((profile) => {
         if (!profile) {
-          errors.noprofile = 'There is no profile for this user';
-          return res.status(404).json(errors);        }
+          errors.noprofile = "There is no profile for this user";
+          return res.status(404).json(errors);
+        }
         res.send(profile);
       });
   }
@@ -114,18 +133,16 @@ router.get(
 
 //////////get profile through handle(it is public )//////////////
 router.get("/handle/:handle", (req, res) => {
-  const errors={};
+  const errors = {};
   Profile.findOne({
     handle: req.params.handle,
   })
     .populate("user", ["name", "avatar"])
     .then((profile) => {
       if (!profile) {
-        errors.noprofile = 'There is no profile for this user';
+        errors.noprofile = "There is no profile for this user";
         res.status(404).json(errors);
-      }   
-      
-      else {
+      } else {
         res.status(200).json(profile);
       }
     })
@@ -154,7 +171,13 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     console.log(req.user);
+  const {isValid,errors}=experiencevalidation(req.body);
 
+  if(!isValid)
+  {
+    console.log("insdie");
+    res.status(400).json(errors);
+  }
     const result = Profile.findOne({
       user: req.user.id,
     })
@@ -165,15 +188,18 @@ router.post(
           company: req.body.company,
           from: req.body.from,
           to: req.body.to,
-          // current: req.body.current,
+          current: req.body.current,
           description: req.body.description,
         };
 
         console.log(newExp);
         // add to an array
-        profile.experince.unshift(newExp);
+        profile.experience.unshift(newExp);
 
         profile.save().then((profile) => res.json(profile));
+      }).catch((err)=>{
+
+        res.status(400).json(err);
       });
   }
 );
@@ -184,6 +210,12 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     console.log(req.user);
+    const {errors,isValid}=educationvalidatiom(req.body);
+
+    if(!isValid)
+    {
+      res.status(400).json(errors);
+    }
 
     const result = Profile.findOne({
       user: req.user.id,
@@ -246,14 +278,16 @@ router.delete(
   }
 );
 ///delete user and its profile////////////
-router.delete("/",passport.authenticate('jwt',{session:false}),(req,res)=>{
-  Profile.findOneAndRemove({user:req.user.id})
-  .then(()=>{
-    User.findOneAndRemove({
-      _id:req.user.id
-    }).then(()=>res.json("User deleted successfully!"))
-
-  })
-})
+router.delete(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOneAndRemove({ user: req.user.id }).then(() => {
+      User.findOneAndRemove({
+        _id: req.user.id,
+      }).then(() => res.json("User deleted successfully!"));
+    });
+  }
+);
 
 module.exports = router;

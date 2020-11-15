@@ -62,7 +62,6 @@ route.post("/register", async (req, res) => {
 route.post("/login", async (req, res) => {
   const { isValid, errors } = loginvalidation(req.body);
 
-  console.log("aa...........................");
   if (!isValid) {
     res.status(400).json(errors);
   }
