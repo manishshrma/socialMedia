@@ -3,8 +3,6 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { loginUser } from "../../actions/authActions";
 import TextFieldGroup from "../common/TextFieldGroup";
-import { object } from "@hapi/joi";
-import errorReducer from "../../reducers/errorReducer";
 class Login extends Component {
   constructor() {
     super();

@@ -25,7 +25,6 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     console.log("printing 1: user data"); // testing purpose
-    console.log(req.user);
     const { errors, isValid } = profilevalidation(req.body);
 
     if (!isValid) {
@@ -36,7 +35,6 @@ router.post(
     profileFields.user = req.user.id; // note this user is attached to req , u know it is insdie of jwt token
 
     if (req.body.company) {
-      console.log(req.body.company);
     }
 
     if (req.body.handle) profileFields.handle = req.body.handle;
@@ -60,8 +58,6 @@ router.post(
 
     const profile = await Profile.findOne({ user: req.user.id });
 
-    console.log("my profile is here......");
-    console.log(profile);
     ///   Watch Mosh for findandupdate query
     if (profile) {
       // update
@@ -84,13 +80,9 @@ router.post(
       }
 
       const profile_obj = new Profile(profileFields);
-      console.log("printing 2: save profile"); // testing purpose
-      // console.log("//////////////////////////////////aaaaa///////////////");
 
       try {
         const savedProfile = await profile_obj.save();
-// console.log("/////////////////////////////////////////////////");
-        console.log(savedProfile);
         res.send(savedProfile);
       } catch (errors) {
         res.status(400).send("got err" + errors);
@@ -104,6 +96,8 @@ router.get("/all", (req, res) => {
     .populate("user", ["name", "avatar"])
     .then((profile) => {
       if (!profile) {
+
+        console.log("............................................................");
         res.send("no profile has been created yet");
       } else {
         res.status(200).json(profile);
@@ -137,7 +131,7 @@ router.get("/handle/:handle", (req, res) => {
   Profile.findOne({
     handle: req.params.handle,
   })
-    .populate("user", ["name", "avatar"])
+    .populate("user", ["name", "avatar"])  // see{}
     .then((profile) => {
       if (!profile) {
         errors.noprofile = "There is no profile for this user";
@@ -247,12 +241,17 @@ router.delete(
   (req, res) => {
     Profile.findOne({ user: req.user.id })
       .then((profile) => {
-        const removeindex = profile.experince
+
+        const removeindex = profile.experience
           .map((item) => item.id)
           .indexOf(req.params.exp_id);
         /////splice out of array
-        profile.experince.splice(removeindex, 1);
+
+        console.log(removeindex+"---------------------------------");
+    const mydata=  profile.experience.splice(removeindex, 1);
+
         //sAVE
+        console.log(mydata);
         profile.save().then((profile) => res.json(profile));
       })
       .catch((err) => res.status(404).json(err));

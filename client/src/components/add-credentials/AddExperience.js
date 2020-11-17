@@ -3,7 +3,6 @@ import { Link, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import TextFieldGroup from "../common/TextFieldGroup";
-import TextAreaFieldGroup from "../common/TexttAreaFieldGroup";
 import { addExperience } from "../../actions/profileActions";
 
 class AddExperience extends Component {

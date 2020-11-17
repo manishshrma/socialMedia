@@ -1,6 +1,6 @@
 
 
-import {CLEAR_CURRENT_PROFILE, GET_PROFILE, PROFILE_LOADING } from "../actions/types"
+import {CLEAR_CURRENT_PROFILE, GET_PROFILE, PROFILE_LOADING,GET_PROFILES } from "../actions/types"
 const initialState = {
   profile: null,
   profiles: null,
@@ -26,6 +26,14 @@ const profileReducer = (state = initialState, action) => {
                 ...state,
                 profile:null
             }
+
+            case GET_PROFILES:
+              return{
+                ...state,
+                profiles:action.payload,
+                loading:false
+              }
+         
     default:
       return state;
   }
