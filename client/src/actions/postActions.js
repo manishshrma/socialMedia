@@ -6,8 +6,9 @@ import {
   ADD_POST,
   DELETE_POST,
   GET_ERRORS,
-  GET_POST,
+  GET_POSTS,
   POST_LOADING,
+  GET_POST
 } from "./types";
 
 /// add post
@@ -48,25 +49,44 @@ export const deletePost = (id) => (dispatch) => {
     );
 };
 
-///get post
+///get posts
 
-export const getPost = () => (dispatch) => {
+export const getPosts = () => (dispatch) => {
   dispatch(setPostLoading());
   axios
     .get("/api/posts")
     .then((res) =>
       dispatch({
-        type: GET_POST,
+        type: GET_POSTS,
         payload: res.data,
       })
     )
     .catch((err) =>
       dispatch({
-        type: GET_POST,
+        type: GET_POSTS,
         payload: null,
       })
     );
 };
+///get post by id
+
+export const getPost = (id) => (dispatch) => {
+    dispatch(setPostLoading());
+    axios
+      .get(`/api/posts/${id}`)
+      .then((res) =>
+        dispatch({
+          type: GET_POST,
+          payload: res.data,
+        })
+      )
+      .catch((err) =>
+        dispatch({
+          type: GET_POST,
+          payload: null,
+        })
+      );
+  };
 
 // add like to post
 export const addLike = (id) => (dispatch) => {

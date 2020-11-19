@@ -4,20 +4,26 @@ import { connect } from 'react-redux';
 import PostForm from './PostForm';
 import PostFeed from './PostFeed';
 import Spinner from '../common/Spinner';
-import { getPost } from '../../actions/postActions';
+import { getPosts } from '../../actions/postActions';
 
 class Posts extends Component {
   componentDidMount() {
-    this.props.getPost();
+  const data=  this.props.getPosts();
+  console.log("last run");
+  console.log(data);
+
+    console.log("Step 1");
   }
 
   render() {
+    console.log("step 2");
 
     const { posts, loading } = this.props.post;
+    console.log(posts);
 
     let postContent;
 
-    if (posts === null || loading) {
+    if (loading||posts === null ) {
       postContent = <Spinner />;
     } else {
       postContent = <PostFeed posts={posts} />;
@@ -39,7 +45,7 @@ class Posts extends Component {
 }
 
 Posts.propTypes = {
-  getPost: PropTypes.func.isRequired,
+  getPosts: PropTypes.func.isRequired,
   post: PropTypes.object.isRequired
 };
 
@@ -47,4 +53,4 @@ const mapStateToProps = state => ({
   post: state.post
 });
 
-export default connect(mapStateToProps, { getPost })(Posts);
+export default connect(mapStateToProps, { getPosts })(Posts);

@@ -1,6 +1,6 @@
 import authReducer from "./authReducer";
 
-const { ADD_POST, GET_POST, POST_LOADING,DELETE_POST } = require("../actions/types");
+const { ADD_POST, GET_POST,GET_POSTS, POST_LOADING,DELETE_POST } = require("../actions/types");
 const initialState = {
   posts: [],
   post: {},
@@ -27,6 +27,13 @@ const postReducer = (state = initialState, action) => {
           }
 
     case GET_POST:
+      return {
+        ...state,
+        post:action.payload,
+        loading:false
+      };
+
+      case GET_POSTS:
       return {
         ...state,
         posts:action.payload,
