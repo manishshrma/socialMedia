@@ -3,6 +3,7 @@ const passport = require("passport");
 const router = express.Router();
 const Post = require("../../models/Post");
 const Profile = require("../../models/Profile");
+const postvalidation=require("../../validations/post_val");
 
 // @route   GET api/posts/test
 // @desc    Tests post route
@@ -13,6 +14,17 @@ router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
+              
+    const { errors, isValid } = postvalidation(req.body);
+
+    // Check Validation
+    if (!isValid) {
+      console.log("hellllllllllllllllooooooooooooo");
+
+      // If any errors, send 400 with errors object
+      return res.status(400).json(errors);
+    }
+
     const newPost = new Post({
       text: req.body.text,
       name: req.body.name,
@@ -23,7 +35,9 @@ router.post(
     console.log("in the create post method");
     try {
       const savedpost = await newPost.save();
-      res.send(savedpost);
+
+      console.log(savedpost);
+      res.status(200).json(savedpost);
     } catch (err) {
       res.send("got err" + err);
     }

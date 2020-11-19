@@ -5,7 +5,6 @@ import { connect } from "react-redux";
 import { logoutUser } from "../../actions/authActions";
 import { clearCurrentProfile } from "../../actions/profileActions";
 
-
 class Navbar extends Component {
   onLogoutClick(e) {
     e.preventDefault();
@@ -17,18 +16,29 @@ class Navbar extends Component {
     const authLinks = (
       <ul class="navbar-nav ml-auto">
         <li class="nav-item">
+          <Link className="nav-link" to="/feed">
+            Post Feed
+          </Link>
+        </li>
+        <li class="nav-item">
+          <Link className="nav-link" to="/dashboard">
+            Dashboard
+          </Link>
+        </li>
+
+        <li className="nav-item">
           <a
             href="#"
             onClick={this.onLogoutClick.bind(this)}
             className="nav-link"
           >
-             <img
+            <img
               className="rounded-circle"
               src={user.avatar}
               alt={user.name}
-              style={{ width: '25px', marginRight: '5px' }}
+              style={{ width: "25px", marginRight: "5px" }}
               title="You must have a Gravatar connected to your email to display an image"
-            />{' '}
+            />{" "}
             Logout
           </a>
         </li>
@@ -74,7 +84,6 @@ class Navbar extends Component {
             </ul>
 
             {isAuthenticated ? authLinks : guestLinks}
-
           </div>
         </div>
       </nav>
@@ -91,4 +100,6 @@ const mapStateToProps = (state) => ({
   auth: state.auth,
 });
 
-export default connect(mapStateToProps, { logoutUser,clearCurrentProfile })(Navbar);
+export default connect(mapStateToProps, { logoutUser, clearCurrentProfile })(
+  Navbar
+);
