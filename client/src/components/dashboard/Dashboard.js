@@ -45,8 +45,8 @@ class Dashboard extends Component {
       } else {
         dashboardContent = (
           <div>
-            <p className="lead text-muted">Welcome {user.name}</p> // global
-            state man!!!
+            <p className="lead text-muted">Welcome {user.name}</p>
+            
             <p>You haven't created profile. Please create profile</p>
             <Link to="/create-profile" className="btn btn-lg btn-info">
               CreateProfile
