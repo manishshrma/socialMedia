@@ -1,1 +1,1 @@
-# socialMedia
+# ConnectUs
